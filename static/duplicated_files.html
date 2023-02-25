@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>文件管理器</title>
+    <link rel="stylesheet" href="static/index.css">
+</head>
+<body>
+<el-main id="app" v-loading="loading">
+    <el-row>
+        <h1>查看重复文件</h1>
+    </el-row>
+
+    <el-collapse accordion>
+        <el-collapse-item v-for="hash in files">
+            <template slot="title">
+                {{ hash.hash + " (" + hash.count + ")" }}
+            </template>
+            <el-table :data="hash.files" style="width: 100%">
+                <el-table-column prop="path" label="path" sortable></el-table-column>
+                <el-table-column prop="name" label="name" sortable></el-table-column>
+            </el-table>
+        </el-collapse-item>
+    </el-collapse>
+
+</el-main>
+</body>
+
+<script src="static/vue.min.js"></script><!-- import Vue before Element -->
+<script src="static/index.js"></script>
+<script src="static/axios.min.js"></script>
+
+<script>
+new Vue({
+  el: '#app',
+  data: {
+      loading: false,
+      files:[],
+  },
+  mounted:function (){
+    this.loadData();
+  },
+  methods: {
+    loadData: function () {
+      var that=this;
+      that.loading=true;
+      axios.get('/api/duplicated_files')
+          .then(function (response) {
+            console.log(response);
+            that.files=response["data"];
+            that.loading=false;
+          })
+          .catch(function (error) {
+            console.log(error);
+          })
+    },
+  }
+})
+</script>
+</html>

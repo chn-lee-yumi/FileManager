@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>文件管理器</title>
+    <!--    <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/element-ui/2.9.2/theme-chalk/index.css">-->
+    <link rel="stylesheet" href="static/index.css">
+</head>
+<body>
+<el-main id="app" v-loading="loading" class="">
+    <el-row>
+        <h1>文件管理器</h1>
+    </el-row>
+
+    <el-row>
+        <el-tag :key="isScanning" effect="dark">扫描状态：{{ isScanning ? "扫描中" : "扫描完成" }}</el-tag>
+        <el-tag :key="scanStatus.start_time" type="success" effect="dark">
+            开始时间：{{ scanStatus.start_time ? new Date(parseInt(scanStatus.start_time*1000)).toLocaleString() : "未开始" }}
+        </el-tag>
+        <el-tag :key="scanStatus.end_time" type="success" effect="dark">
+            结束时间：{{ scanStatus.end_time ? new Date(parseInt(scanStatus.end_time*1000)).toLocaleString() : "未知" }}
+        </el-tag>
+        <el-tag v-if="scanStatus.file" :key="scanStatus.file" type="info" effect="dark">文件总数：{{ scanStatus.file }}</el-tag>
+        <el-tag v-if="scanStatus.size" :key="scanStatus.size" type="info" effect="dark">
+            文件总大小：{{ Math.round(scanStatus.size / 1024 / 1024) }}MB
+        </el-tag>
+        <el-tag v-if="scanStatus.total" :key="scanStatus.total" type="info" effect="dark">文件总数：{{ scanStatus.total }}</el-tag>
+        <el-tag v-if="scanStatus.remain" :key="scanStatus.remain" type="info" effect="dark">待扫描文件数：{{ scanStatus.remain }}</el-tag>
+        <el-tag v-if="scanStatus.quick_scan!=null" :key="scanStatus.quick_scan" type="warning" effect="dark">快速扫描：{{ scanStatus.quick_scan }}
+        </el-tag>
+        <el-tag v-if="scanStatus.progress" :key="scanStatus.progress" type="danger" effect="dark">
+            扫描进度：{{ Math.trunc(scanStatus.progress*100) }}%
+        </el-tag>
+        <el-button round v-if="isScanning" :key="scanStatus.quick_scan" type="primary" size="medium" :loading="true">
+            {{ scanStatus.quick_scan ? "快速扫描中" : "全量扫描中" }}
+        </el-button>
+        <el-button-group v-if="!isScanning">
+            <el-button round :loading="isScanning" type="primary" size="medium" @click="scan">全量扫描</el-button>
+            <el-button round :loading="isScanning" type="primary" size="medium" @click="quickScan">快速扫描</el-button>
+        </el-button-group>
+        <el-progress v-if="scanStatus.progress" :percentage="Math.trunc(scanStatus.progress*100)" :stroke-width="10"></el-progress>
+    </el-row>
+
+    <el-row>
+        <h2>查看扫描文件</h2>
+    </el-row>
+
+    <el-row>
+        <el-link type="primary" href="static/search_files.html" target="_blank">搜索文件</el-link>
+        <el-link type="primary" href="static/duplicated_files.html" target="_blank">查看重复文件</el-link>
+        <el-link :key="scanStatus.new_files" type="success" href="static/new_files.html" target="_blank">查看新增文件（{{ scanStatus.new_files }}个）
+        </el-link>
+        <el-link :key="scanStatus.changed_files" type="success" href="static/changed_files.html" target="_blank">
+            查看修改文件（{{ scanStatus.changed_files }}个）
+        </el-link>
+        <el-link :key="scanStatus.deleted_files" type="success" href="static/deleted_files.html" target="_blank">
+            查看删除文件（{{ scanStatus.deleted_files }}个）
+        </el-link>
+    </el-row>
+
+</el-main>
+</body>
+
+<!--<script src="https://cdnjs.loli.net/ajax/libs/vue/2.6.10/vue.min.js"></script>&lt;!&ndash; import Vue before Element &ndash;&gt;-->
+<!--<script src="https://cdnjs.loli.net/ajax/libs/element-ui/2.9.2/index.js"></script>-->
+<!--<script src="https://cdnjs.loli.net/ajax/libs/axios/0.19.0-beta.1/axios.min.js"></script>-->
+<script src="static/vue.min.js"></script><!-- import Vue before Element -->
+<script src="static/index.js"></script>
+<script src="static/axios.min.js"></script>
+
+<script>
+new Vue({
+  el: '#app',
+  data: {
+      loading: false,
+      isScanning: false,
+      scanStatus: null,
+      timer: null,
+  },
+  mounted:function (){
+    this.loadData();
+    this.timer = setInterval(this.loadData, 5000);
+  },
+  methods: {
+    loadData: function () {
+      var that=this;
+      axios.get('api/scan_status')
+          .then(function (response) {
+            console.log(response);
+            that.scanStatus=response["data"];
+            that.isScanning=response["data"]["status"];
+          })
+          .catch(function (error) {
+            console.log(error);
+          })
+    },
+    scan: function () {
+      var that=this;
+      axios.get('api/scan')
+          .then(function (response) {
+            console.log(response);
+            that.loadData();
+          })
+          .catch(function (error) {
+            console.log(error);
+          })
+    },
+    quickScan: function () {
+      var that=this;
+      axios.get('api/scan?quick_scan=1')
+          .then(function (response) {
+            console.log(response);
+            that.loadData();
+          })
+          .catch(function (error) {
+            console.log(error);
+          })
+    },
+  }
+})
+</script>
+</html>

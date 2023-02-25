@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>文件管理器</title>
+    <link rel="stylesheet" href="static/index.css">
+</head>
+<body>
+<el-main id="app" v-loading="loading">
+    <el-row>
+        <h1>查看修改文件</h1>
+    </el-row>
+
+    <el-row>
+        <el-table :data="files.file_list" style="width: 100%">
+            <el-table-column prop="path" label="path" sortable></el-table-column>
+            <el-table-column prop="name" label="name" sortable></el-table-column>
+            <el-table-column prop="old_hash" label="old_hash" sortable></el-table-column>
+            <el-table-column prop="new_hash" label="new_hash" sortable></el-table-column>
+            <el-table-column prop="old_size" label="old_size" sortable></el-table-column>
+            <el-table-column prop="new_size" label="new_size" sortable></el-table-column>
+            <el-table-column prop="old_modify_time" label="old_modify_time" sortable></el-table-column>
+            <el-table-column prop="new_modify_time" label="new_modify_time" sortable></el-table-column>
+        </el-table>
+    </el-row>
+
+</el-main>
+</body>
+
+<script src="static/vue.min.js"></script><!-- import Vue before Element -->
+<script src="static/index.js"></script>
+<script src="static/axios.min.js"></script>
+
+<script>
+new Vue({
+  el: '#app',
+  data: {
+      loading: false,
+      files:[],
+  },
+  mounted:function (){
+    this.loadData();
+  },
+  methods: {
+    loadData: function () {
+      var that=this;
+      that.loading=true;
+      axios.get('/api/changed_files')
+          .then(function (response) {
+            console.log(response);
+            that.files=response["data"];
+            that.loading=false;
+          })
+          .catch(function (error) {
+            console.log(error);
+          })
+    },
+  }
+})
+</script>
+</html>
