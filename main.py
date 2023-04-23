@@ -54,7 +54,7 @@ def init():
 def scan(quick_scan=False):
     """
     扫描文件
-    :param quick_scan: 快速扫描，如果为True，则只判断文件大小，文件大小发生变化才重新计算hash
+    :param quick_scan: 快速扫描，如果为True，则只判断文件修改时间，文件修改时间发生变化才重新计算hash
     :return:
     """
     global is_scanning, total_files, is_quick_scan
@@ -113,6 +113,7 @@ def scan(quick_scan=False):
                         old_hash=file.hash, new_hash=file_hash,
                         old_modify_time=file.modify_time, new_modify_time=modify_time,
                     ))
+                    file.modify_time = modify_time
                 elif not quick_scan:  # 文件修改日期没发生变化，如果不是快速扫描，则计算hash并更新
                     file_hash = get_hash(path)
                     if file_hash is None:
@@ -312,4 +313,4 @@ if __name__ == '__main__':
     init()
     # scan()
     # print(get_duplicated_files())
-    app.run(port=8080, host="0.0.0.0")
+    app.run(port=8083, host="0.0.0.0")
