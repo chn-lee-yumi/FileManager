@@ -3,11 +3,12 @@ import os
 import requests
 
 root = "/srv/dev-disk-by-uuid-5b249b15-24f2-4796-a353-5ba789dc1e45/lym/"
+# scan_paths = [
+#     "/srv/dev-disk-by-uuid-5b249b15-24f2-4796-a353-5ba789dc1e45/lym/照片和视频/照片-真的没备份吗",
+# ]
 scan_paths = [
-    "/srv/dev-disk-by-uuid-5b249b15-24f2-4796-a353-5ba789dc1e45/lym/照片和视频/照片-真的没备份吗",
+    "/Volumes/NO NAME/DCIM",
 ]
-
-# /srv/dev-disk-by-uuid-5b249b15-24f2-4796-a353-5ba789dc1e45/lym/确认重复后删除/
 
 for scan_path in scan_paths:
     print("*" * 50)

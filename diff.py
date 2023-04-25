@@ -7,8 +7,6 @@ path_pairs = [
      '/srv/dev-disk-by-uuid-5b249b15-24f2-4796-a353-5ba789dc1e45/lym/确认重复后删除/照片和视频/20220129未整理/Video'),
 ]
 
-# /srv/dev-disk-by-uuid-5b249b15-24f2-4796-a353-5ba789dc1e45/lym/确认重复后删除/
-
 for path_pair in path_pairs:
     print("*" * 50)
     left_path = path_pair[0]

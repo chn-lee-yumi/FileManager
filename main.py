@@ -114,6 +114,7 @@ def scan(quick_scan=False):
                         old_modify_time=file.modify_time, new_modify_time=modify_time,
                     ))
                     file.modify_time = modify_time
+                    file.hash = file_hash
                 elif not quick_scan:  # 文件修改日期没发生变化，如果不是快速扫描，则计算hash并更新
                     file_hash = get_hash(path)
                     if file_hash is None:
