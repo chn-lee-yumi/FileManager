@@ -79,9 +79,16 @@ def scan(quick_scan=False):
         print("开始扫描，当前扫描次数：", scan_times.value)
         paths = glob.glob('%s/**/*' % ROOT, recursive=True)
         total_files = len(paths)
-        for path in paths:
+        print("total_files:", total_files)
+        existing_files = {(file.path, file.name): file for file in File.query.all()}
+        print("existing_files:", len(existing_files))
+        for index, path in enumerate(paths):
             if DEBUG:
-                print("scanning:", path)
+                try:
+                    print("scanning:", path)
+                except UnicodeEncodeError:
+                    safe_path = path.encode('utf-8', 'surrogatepass').decode('utf-8', 'replace')  # 处理复杂字符
+                    print("scanning (with replacement):", safe_path)
             if os.path.isdir(path) or not os.path.exists(path):  # 跳过文件夹和不存在的文件
                 continue
             path_name = os.path.dirname(path)
@@ -99,7 +106,7 @@ def scan(quick_scan=False):
                     continue
             modify_time = get_modify_time(path)
             file_name = os.path.basename(path)
-            file = File.query.filter_by(path=path_name, name=file_name).first()
+            file = existing_files.get((path_name, file_name))
             if file:
                 # 检查文件修改日期有没有变化
                 if modify_time != file.modify_time:
@@ -130,7 +137,6 @@ def scan(quick_scan=False):
                         file.hash = file_hash
                 file.size = file_size
                 file.scan_times = scan_times.value
-                db.session.commit()
             else:
                 # 加入新文件
                 file_hash = get_hash(path)
@@ -140,7 +146,9 @@ def scan(quick_scan=False):
                 print(file, "发现新文件")
                 db.session.add(file)
                 db.session.add(NewFiles(name=file.name, path=file.path, size=file_size, hash=file_hash))
+            if index % 1000 == 0:  # 每处理1000个再commit
                 db.session.commit()
+        db.session.commit()
         # 检查被删除的文件
         deleted_files = File.query.filter(File.scan_times != scan_times.value)
         for file in deleted_files:
