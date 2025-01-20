@@ -82,13 +82,18 @@ def scan(quick_scan=False):
         print("total_files:", total_files)
         existing_files = {(file.path, file.name): file for file in File.query.all()}
         print("existing_files:", len(existing_files))
-        for index, path in enumerate(paths):
+        last_commit = time.time()
+        invalid_paths = []
+        for path in paths:
+            try:
+                path.encode('utf-8')  # 尝试编码为 UTF-8
+            except UnicodeEncodeError:
+                safe_path = path.encode('utf-8', 'surrogatepass').decode('utf-8', 'replace')  # 处理复杂字符
+                print("路径包含非法字符，跳过该文件:", safe_path)
+                invalid_paths.append(safe_path)
+                continue
             if DEBUG:
-                try:
-                    print("scanning:", path)
-                except UnicodeEncodeError:
-                    safe_path = path.encode('utf-8', 'surrogatepass').decode('utf-8', 'replace')  # 处理复杂字符
-                    print("scanning (with replacement):", safe_path)
+                print("scanning:", path)
             if os.path.isdir(path) or not os.path.exists(path):  # 跳过文件夹和不存在的文件
                 continue
             path_name = os.path.dirname(path)
@@ -146,8 +151,10 @@ def scan(quick_scan=False):
                 print(file, "发现新文件")
                 db.session.add(file)
                 db.session.add(NewFiles(name=file.name, path=file.path, size=file_size, hash=file_hash))
-            if index % 1000 == 0:  # 每处理1000个再commit
+            if time.time() - last_commit > 60:  # 每分钟commit一次
+                print("commit...")
                 db.session.commit()
+                last_commit = time.time()
         db.session.commit()
         # 检查被删除的文件
         deleted_files = File.query.filter(File.scan_times != scan_times.value)
@@ -162,6 +169,10 @@ def scan(quick_scan=False):
         end_time.value = int(time.time())
         db.session.commit()
         is_scanning = False
+        if invalid_paths:
+            print("本次扫描跳过了下面的文件（因为路径包含非法字符）：")
+            for invalid_path in invalid_paths:
+                print(invalid_path)
         print("扫描完成")
 
 
