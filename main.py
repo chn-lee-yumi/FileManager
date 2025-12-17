@@ -189,7 +189,7 @@ def update_hashes_table():
         db.session.commit()
 
 
-def get_duplicated_files():
+def get_duplicated_files(limit=None, offset=None):
     """
     获取重复的文件
     :return: 重复文件列表，格式如下
@@ -200,20 +200,41 @@ def get_duplicated_files():
     """
     duplicated_files = []
     with app.app_context():
-        hashes = Hashes.query.filter(Hashes.count >= 2).order_by(desc(Hashes.count))
-        for hash in hashes:
-            hash_dict = {"hash": hash.hash, "count": hash.count, "files": []}
-            files = File.query.filter_by(hash=hash.hash).order_by(desc(File.size))
+        # 先获取总数，方便前端分页
+        total = Hashes.query.filter(Hashes.count >= 2).count()
+        query = Hashes.query.filter(Hashes.count >= 2).order_by(desc(Hashes.count))
+        # 应用分页
+        if offset is not None:
+            query = query.offset(offset)
+        if limit is not None:
+            query = query.limit(limit)
+        for hash_row in query:
+            hash_dict = {"hash": hash_row.hash, "count": hash_row.count, "files": []}
+            files = File.query.filter_by(hash=hash_row.hash).order_by(desc(File.size))
             for file in files:
                 hash_dict["files"].append({"path": file.path, "name": file.name})
             duplicated_files.append(hash_dict)
-        return duplicated_files
+        return {
+            "total": total,
+            "items": duplicated_files,
+        }
 
 
 @app.route("/api/duplicated_files", methods=["GET"])
 def api_duplicated_files():
     """查询重复文件"""
-    return jsonify(get_duplicated_files())
+    # 读取 URL 参数
+    limit = request.args.get("limit", type=int)
+    offset = request.args.get("offset", type=int)
+    # 如果前端用 page / page_size，也做个兼容
+    page = request.args.get("page", type=int)
+    page_size = request.args.get("page_size", type=int)
+    if page is not None and page_size is not None:
+        # 页码从1开始
+        offset = (page - 1) * page_size
+        limit = page_size
+    result = get_duplicated_files(limit=limit, offset=offset)
+    return jsonify(result)
 
 
 @app.route("/api/new_files", methods=["GET"])

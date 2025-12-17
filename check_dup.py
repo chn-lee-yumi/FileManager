@@ -1,3 +1,6 @@
+"""
+这个用来扫描本地目录，检查文件是否在NAS的数据库中存在
+"""
 import glob
 import os
 import requests

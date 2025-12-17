@@ -12,7 +12,7 @@
     </el-row>
 
     <el-collapse accordion>
-        <el-collapse-item v-for="hash in files">
+        <el-collapse-item v-for="hash in files" :key="hash.hash">
             <template slot="title">
                 {{ hash.hash + " (" + hash.count + ")" }}
             </template>
@@ -22,6 +22,18 @@
             </el-table>
         </el-collapse-item>
     </el-collapse>
+
+    <!-- 分页 -->
+    <el-row style="margin-top: 16px; text-align: center;">
+        <el-pagination
+                background
+                layout="prev, pager, next, jumper, total"
+                :current-page="page"
+                :page-size="pageSize"
+                :total="total"
+                @current-change="handlePageChange">
+        </el-pagination>
+    </el-row>
 
 </el-main>
 </body>
@@ -36,6 +48,9 @@ new Vue({
   data: {
       loading: false,
       files:[],
+      page: 1,
+      pageSize: 10,
+      total: 0
   },
   mounted:function (){
     this.loadData();
@@ -44,16 +59,28 @@ new Vue({
     loadData: function () {
       var that=this;
       that.loading=true;
-      axios.get('/api/duplicated_files')
+      axios.get('/api/duplicated_files', {
+              params: {
+                  page: that.page,
+                  page_size: that.pageSize
+              }
+          })
           .then(function (response) {
             console.log(response);
-            that.files=response["data"];
-            that.loading=false;
+            const data = response.data;
+            that.files = data.items || [];
+            that.total = data.total || 0;
+            that.loading = false;
           })
           .catch(function (error) {
             console.log(error);
+            that.loading = false;
           })
     },
+    handlePageChange: function (newPage) {
+      this.page = newPage;
+      this.loadData();
+    }
   }
 })
 </script>
