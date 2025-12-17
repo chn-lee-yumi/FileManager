@@ -22,10 +22,22 @@ DUP_IGNORE_SUFFIXES = (
     "js",
     "mvfrm",
     "bnf",
+    "frx",
+    "md",
+    "plist",
+    "yml",
+    "rb",
+    "py",
+    "ini",
 )
 
 # 查重时要忽略的完整文件名（区分大小写）
 DUP_IGNORE_FILE_NAMES = (
     "LICENSE",
     "license",
+    "INSTALLER",
+    "semver",
+    "Gemfile",
 )
+
+DUP_IGNORE_FILE_SIZE = 64 * 1024  # 查重时忽略小于该大小的文件，单位：字节
