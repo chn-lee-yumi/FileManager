@@ -206,7 +206,7 @@ def get_duplicated_files(limit=None, offset=None):
             # 统一处理，确保前面有点
             suffix_filters.append(File.name.like(f'%.{suf}'))
         # 构造文件名过滤条件
-        filename_filter = File.name.in_(IGNORE_FILE_NAMES) if IGNORE_FILE_NAMES else None
+        filename_filter = File.name.in_(DUP_IGNORE_FILE_NAMES) if DUP_IGNORE_FILE_NAMES else None
         base_filters = [File.size > 0]
         if suffix_filters:
             base_filters.append(not_(or_(*suffix_filters)))
