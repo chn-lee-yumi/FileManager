@@ -13,7 +13,7 @@ import threading
 import time
 
 from flask import Flask, jsonify, request
-from sqlalchemy import func, desc, asc
+from sqlalchemy import func, desc, asc, or_, not_
 
 from config import *
 from database import db, File, Metadata, Hashes, NewFiles, ChangedFiles, DeletedFiles
@@ -200,9 +200,34 @@ def get_duplicated_files(limit=None, offset=None):
     """
     duplicated_files = []
     with app.app_context():
+        # 构造后缀过滤条件
+        suffix_filters = []
+        for suf in DUP_IGNORE_SUFFIXES:
+            # 统一处理，确保前面有点
+            suffix_filters.append(File.name.like(f'%.{suf}'))
+        # 构造文件名过滤条件
+        filename_filter = File.name.in_(IGNORE_FILE_NAMES) if IGNORE_FILE_NAMES else None
+        base_filters = [File.size > 0]
+        if suffix_filters:
+            base_filters.append(not_(or_(*suffix_filters)))
+        if filename_filter is not None:
+            base_filters.append(not_(filename_filter))
+        base_file_query = File.query.filter(*base_filters)
+        subquery = (
+            base_file_query.with_entities(
+                File.hash.label('hash'),
+                func.count('*').label('count')
+            )
+            .group_by(File.hash)
+            .having(func.count('*') >= 2)
+        ).subquery()
+
         # 先获取总数，方便前端分页
-        total = Hashes.query.filter(Hashes.count >= 2).count()
-        query = Hashes.query.filter(Hashes.count >= 2).order_by(desc(Hashes.count))
+        total = db.session.query(func.count()).select_from(subquery).scalar()
+        query = db.session.query(
+            subquery.c.hash,
+            subquery.c.count
+        ).order_by(desc(subquery.c.count))
         # 应用分页
         if offset is not None:
             query = query.offset(offset)
