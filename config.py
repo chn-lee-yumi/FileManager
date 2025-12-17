@@ -29,6 +29,8 @@ DUP_IGNORE_SUFFIXES = (
     "rb",
     "py",
     "ini",
+    "vmdk",
+    "map",
 )
 
 # 查重时要忽略的完整文件名（区分大小写）
@@ -40,4 +42,4 @@ DUP_IGNORE_FILE_NAMES = (
     "Gemfile",
 )
 
-DUP_IGNORE_FILE_SIZE = 64 * 1024  # 查重时忽略小于该大小的文件，单位：字节
+DUP_IGNORE_FILE_SIZE = 8 * 1024 * 1024  # 查重时忽略小于该大小的文件，单位：字节。这里是8MB
