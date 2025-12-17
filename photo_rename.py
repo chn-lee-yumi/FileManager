@@ -1,3 +1,7 @@
+"""
+该脚本用于批量重命名指定目录下的照片文件，重命名格式为“创建日期_原文件名.jpg”。
+创建日期从照片的exif信息中提取，格式为“YYYYMMDD_HHMMSS”。
+"""
 import os
 import glob
 import piexif
