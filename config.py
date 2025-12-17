@@ -31,6 +31,7 @@ DUP_IGNORE_SUFFIXES = (
     "ini",
     "vmdk",
     "map",
+    "prproj",
 )
 
 # 查重时要忽略的完整文件名（区分大小写）
