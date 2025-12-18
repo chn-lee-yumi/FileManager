@@ -213,6 +213,13 @@ def get_duplicated_files(limit=None, offset=None):
         if filename_filter is not None:
             base_filters.append(not_(filename_filter))
         base_file_query = File.query.filter(*base_filters)
+        size_subquery = (
+            File.query.with_entities(
+                File.hash.label('hash'),
+                func.max(File.size).label('max_size')
+            )
+            .group_by(File.hash)
+        ).subquery()
         subquery = (
             base_file_query.with_entities(
                 File.hash.label('hash'),
@@ -224,10 +231,14 @@ def get_duplicated_files(limit=None, offset=None):
 
         # 先获取总数，方便前端分页
         total = db.session.query(func.count()).select_from(subquery).scalar()
-        query = db.session.query(
-            subquery.c.hash,
-            subquery.c.count
-        ).order_by(desc(subquery.c.count))
+        query = (
+            db.session.query(
+                subquery.c.hash,
+                subquery.c.count
+            )
+            .join(size_subquery, size_subquery.c.hash == subquery.c.hash)
+            .order_by(desc(size_subquery.c.max_size))
+        )
         # 应用分页
         if offset is not None:
             query = query.offset(offset)

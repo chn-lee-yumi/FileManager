@@ -10,7 +10,7 @@ root = "/srv/dev-disk-by-uuid-5b249b15-24f2-4796-a353-5ba789dc1e45/lym/"
 #     "/srv/dev-disk-by-uuid-5b249b15-24f2-4796-a353-5ba789dc1e45/lym/照片和视频/照片-真的没备份吗",
 # ]
 scan_paths = [
-    "/Volumes/NO NAME/DCIM",
+    "/srv/dev-disk-by-uuid-5b249b15-24f2-4796-a353-5ba789dc1e45/lym/备份/32G 东芝白卡备份/hiwifi_data/filetransit0/单片机课设",
 ]
 
 for scan_path in scan_paths:

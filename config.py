@@ -10,6 +10,7 @@ IGNORE_PATHS = ("/srv/dev-disk-by-uuid-5b249b15-24f2-4796-a353-5ba789dc1e45/lym/
                 "/srv/dev-disk-by-uuid-5b249b15-24f2-4796-a353-5ba789dc1e45/lym/学习和工作/Linux/anmpp/android.pgsql",
                 "/srv/dev-disk-by-uuid-5b249b15-24f2-4796-a353-5ba789dc1e45/lym/github",
                 "/srv/dev-disk-by-uuid-5b249b15-24f2-4796-a353-5ba789dc1e45/lym/kodbox",
+                "/srv/dev-disk-by-uuid-5b249b15-24f2-4796-a353-5ba789dc1e45/lym/transformer",
                 )  # 末尾不要加/
 
 # 查重时要忽略的后缀（不含点），例如: "ts" 表示 "*.ts"
