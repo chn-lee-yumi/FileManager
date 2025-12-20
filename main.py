@@ -55,6 +55,7 @@ def scan(quick_scan=False):
     """
     扫描文件
     :param quick_scan: 快速扫描，如果为True，则只判断文件修改时间，文件修改时间发生变化才重新计算hash
+    TODO：无法识别软连接，会当成正常文件处理，导致去重的时候查询有bug
     :return:
     """
     global is_scanning, total_files, is_quick_scan
